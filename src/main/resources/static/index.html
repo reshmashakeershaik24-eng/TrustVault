@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustVault | Secure Document Vault</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #08111f;
+            color: #f5f7ff;
+            min-height: 100vh;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 24px 8%;
+            border-bottom: 1px solid #26394d;
+        }
+
+        .logo {
+            color: #65e6c3;
+            font-size: 27px;
+            font-weight: bold;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .welcome {
+            color: #65e6c3;
+            overflow-wrap: anywhere;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 20px;
+            border: 1px solid #65e6c3;
+            border-radius: 8px;
+            background: #65e6c3;
+            color: #08111f;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .button:hover {
+            background: #4ed5b1;
+        }
+
+        .secondary {
+            display: inline-block;
+            padding: 12px 20px;
+            border: 1px solid #46546b;
+            border-radius: 8px;
+            background: #111e30;
+            color: #f5f7ff;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .secondary:hover {
+            background: #26394d;
+        }
+
+        main {
+            width: 84%;
+            max-width: 1150px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            align-items: center;
+            gap: 45px;
+            padding: 80px 0;
+            min-height: 480px;
+        }
+
+        .tag {
+            color: #65e6c3;
+            font-size: 13px;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: clamp(38px, 5vw, 62px);
+            line-height: 1.12;
+            margin-bottom: 22px;
+        }
+
+        h1 span {
+            color: #65e6c3;
+        }
+
+        .description {
+            color: #aab7ca;
+            line-height: 1.8;
+            max-width: 560px;
+            margin-bottom: 28px;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .security-card,
+        .feature {
+            padding: 30px;
+            background: #111e30;
+            border: 1px solid #26394d;
+            border-radius: 18px;
+        }
+
+        .security-card {
+            text-align: center;
+        }
+
+        .shield {
+            font-size: 68px;
+            margin-bottom: 18px;
+        }
+
+        .security-card h2 {
+            margin-bottom: 12px;
+        }
+
+        .security-card p,
+        .feature p {
+            color: #aab7ca;
+            line-height: 1.7;
+        }
+
+        .status {
+            margin-top: 24px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #15382f;
+            color: #65e6c3;
+        }
+
+        .features {
+            padding: 35px 0 75px;
+        }
+
+        .features > h2 {
+            text-align: center;
+            font-size: 30px;
+            margin-bottom: 30px;
+        }
+
+        .feature-grid {
+            display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .feature {
+            display: block;
+            color: inherit;
+            text-decoration: none;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            border-color: #65e6c3;
+        }
+
+        .feature:focus-visible {
+            outline: 2px solid #65e6c3;
+            outline-offset: 4px;
+        }
+
+        .feature .icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .feature h3 {
+            margin-bottom: 12px;
+        }
+
+        .feature p {
+            margin-bottom: 18px;
+        }
+
+        .feature-action {
+            display: inline-block;
+            color: #65e6c3;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        footer {
+            text-align: center;
+            color: #8492a8;
+            padding: 25px;
+            border-top: 1px solid #202d40;
+        }
+
+        #pageMessage {
+            padding: 50px 15px;
+            text-align: center;
+            color: #aab7ca;
+        }
+
+        @media (max-width: 750px) {
+            nav {
+                padding: 20px 6%;
+            }
+
+            main {
+                width: 88%;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+                padding: 55px 0;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="pageMessage">Checking your secure session...</div>
+
+    <div id="app" hidden>
+        <nav>
+            <div class="logo">🛡 TrustVault</div>
+
+            <div class="nav-actions">
+                <span class="welcome" id="welcomeMessage"></span>
+                <a href="/documents.html" class="button">My Documents</a>
+                <button id="logoutButton" class="secondary" type="button">
+                    Logout
+                </button>
+            </div>
+        </nav>
+
+        <main>
+            <section class="hero">
+                <div>
+                    <p class="tag">YOUR SECURITY. YOUR CONTROL.</p>
+
+                    <h1>
+                        Protect What<br>
+                        Matters <span>Most.</span>
+                    </h1>
+
+                    <p class="description">
+                        Welcome to TrustVault — a secure document management
+                        workspace designed to help you manage your documents
+                        with ownership controls and activity tracking.
+                    </p>
+
+                    <div class="hero-actions">
+                        <a href="/documents.html" class="button">
+                            Open My Documents
+                        </a>
+                    </div>
+                </div>
+
+                <div class="security-card">
+                    <div class="shield">🛡️</div>
+                    <h2>Your Digital Vault</h2>
+                    <p>
+                        Manage your documents with account-based access
+                        and activity logging.
+                    </p>
+                    <div class="status">● TrustVault Workspace</div>
+                </div>
+            </section>
+
+         
+<section class="features">
+    <h2>Your Workspace</h2>
+
+    <div class="feature-grid">
+        <a class="feature" href="/documents.html">
+            <div class="icon">📁</div>
+            <h3>Document Management</h3>
+            <p>
+                Create and view documents, share access with users,
+                and revoke permissions whenever needed.
+            </p>
+            <span class="feature-action">Manage Documents →</span>
+        </a>
+
+        <a class="feature" href="/activity-logs.html">
+            <div class="icon">📋</div>
+            <h3>Activity Tracking</h3>
+            <p>
+                Review document creation, sharing, opening,
+                and access revocation in a clear audit trail.
+            </p>
+            <span class="feature-action">View Activity Logs →</span>
+        </a>
+    </div>
+</section>
+
+        </main>
+
+        <footer>
+            © 2026 TrustVault. Secure document management.
+        </footer>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            const message = document.getElementById("pageMessage");
+
+            try {
+                const response = await fetch("/api/auth/me", {
+                    method: "GET",
+                    credentials: "same-origin",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    window.location.replace("/login.html");
+                    return;
+                }
+
+                if (!response.ok) {
+                    message.textContent =
+                        "Unable to verify your session. Please try again.";
+                    return;
+                }
+
+                const user = await response.json();
+
+                document.getElementById("welcomeMessage").textContent =
+                    "Welcome, " + (user.fullName || "TrustVault User");
+
+                document.getElementById("pageMessage").hidden = true;
+                document.getElementById("app").hidden = false;
+            } catch (error) {
+                message.textContent =
+                    "Cannot connect to TrustVault. Please check the server.";
+                console.error("Session check failed:", error);
+            }
+        }
+
+        document.getElementById("logoutButton").addEventListener(
+            "click",
+            async function () {
+                const button = this;
+                button.disabled = true;
+                button.textContent = "Logging out...";
+
+                try {
+                    const response = await fetch("/api/logout", {
+                        method: "POST",
+                        credentials: "same-origin"
+                    });
+
+                    if (response.ok) {
+                        window.location.replace("/login.html");
+                    } else {
+                        button.disabled = false;
+                        button.textContent = "Logout";
+                        alert("Logout failed. Please try again.");
+                    }
+                } catch (error) {
+                    button.disabled = false;
+                    button.textContent = "Logout";
+                    alert("Cannot connect to the server.");
+                }
+            }
+        );
+
+        loadDashboard();
+    </script>
+</body>
+</html>

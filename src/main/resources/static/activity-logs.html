@@ -1,0 +1,631 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Logs | TrustVault</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f4f7fb;
+            color: #172033;
+        }
+
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid #e5eaf2;
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: 750;
+            color: #2449a5;
+            letter-spacing: -0.5px;
+        }
+
+        .brand span {
+            color: #172033;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: #46536b;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        nav a:hover {
+            color: #2449a5;
+        }
+
+        main {
+            max-width: 1180px;
+            margin: 38px auto;
+            padding: 0 22px 40px;
+        }
+
+        .heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+            letter-spacing: -0.8px;
+        }
+
+        .subtitle {
+            margin: 0;
+            color: #68758a;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        button {
+            border: 0;
+            border-radius: 9px;
+            padding: 11px 17px;
+            font-weight: 650;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .refresh {
+            background: #2449a5;
+            color: white;
+        }
+
+        .refresh:hover {
+            background: #193980;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: white;
+            padding: 22px;
+            border: 1px solid #e7ebf2;
+            border-radius: 14px;
+            box-shadow: 0 3px 12px rgba(25, 42, 75, 0.035);
+        }
+
+        .stat-label {
+            color: #68758a;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 29px;
+            font-weight: 750;
+            letter-spacing: -0.5px;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e7ebf2;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 3px 12px rgba(25, 42, 75, 0.035);
+        }
+
+        .panel-top {
+            padding: 21px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #edf0f5;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .search {
+            width: 270px;
+            max-width: 100%;
+            padding: 11px 13px;
+            border: 1px solid #dce2ec;
+            border-radius: 9px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search:focus {
+            border-color: #5276ce;
+            box-shadow: 0 0 0 3px rgba(82, 118, 206, 0.12);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead {
+            background: #f8faff;
+        }
+
+        th {
+            color: #69758a;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            font-weight: 700;
+            padding: 15px 20px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 17px 20px;
+            border-top: 1px solid #eef1f6;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        tbody tr:hover {
+            background: #fafbfe;
+        }
+
+        .action {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border-radius: 20px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .create {
+            background: #e8f7ee;
+            color: #187344;
+        }
+
+        .share {
+            background: #eaf0ff;
+            color: #3157b7;
+        }
+
+        .open {
+            background: #fff3dc;
+            color: #96600a;
+        }
+
+        .revoke {
+            background: #ffebeb;
+            color: #b42332;
+        }
+
+        .unknown {
+            background: #edf0f5;
+            color: #4b5565;
+        }
+
+        .muted {
+            color: #758198;
+        }
+
+        .status {
+            padding: 26px 20px;
+            color: #68758a;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .error {
+            color: #b42332;
+        }
+
+        .footer {
+            color: #8290a5;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 22px;
+        }
+
+        @media (max-width: 850px) {
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 520px) {
+            header {
+                padding: 16px 5%;
+            }
+
+            main {
+                margin-top: 26px;
+                padding: 0 14px 28px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+
+            .stats {
+                gap: 10px;
+            }
+
+            .stat {
+                padding: 16px;
+            }
+
+            .stat-value {
+                font-size: 25px;
+            }
+
+            .panel-top {
+                padding: 17px;
+            }
+
+            .search {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <div class="brand">Trust<span>Vault</span></div>
+
+    <nav>
+        <a href="/index.html">Home</a>
+        <a href="/documents.html">My Documents</a>
+        <a href="/api/logout" id="logoutLink">Logout</a>
+    </nav>
+</header>
+
+<main>
+    <div class="heading">
+        <div>
+            <h1>Activity Logs</h1>
+            <p class="subtitle">
+                Monitor document activity and review your workspace audit trail.
+            </p>
+        </div>
+
+        <button class="refresh" id="refreshButton" type="button">
+            ↻ Refresh Logs
+        </button>
+    </div>
+
+    <section class="stats" aria-label="Activity summary">
+        <div class="stat">
+            <div class="stat-label">Total Activities</div>
+            <div class="stat-value" id="totalCount">—</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">Documents Created</div>
+            <div class="stat-value" id="createCount">—</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">Documents Shared</div>
+            <div class="stat-value" id="shareCount">—</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">Access Revocations</div>
+            <div class="stat-value" id="revokeCount">—</div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-top">
+            <h2>Recent Activity</h2>
+
+            <input
+                id="searchInput"
+                class="search"
+                type="search"
+                placeholder="Search activity..."
+                aria-label="Search activity logs"
+            >
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Activity</th>
+                    <th>User ID</th>
+                    <th>Document ID</th>
+                    <th>Date &amp; Time</th>
+                </tr>
+                </thead>
+
+                <tbody id="activityBody">
+                <tr>
+                    <td colspan="4" class="status">Loading activity logs...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="resultStatus" class="status" hidden></div>
+    </section>
+
+    <p class="footer">
+        TrustVault · Administrative audit trail · Authorized access only
+    </p>
+</main>
+
+<script>
+    const activityBody = document.getElementById("activityBody");
+    const resultStatus = document.getElementById("resultStatus");
+    const refreshButton = document.getElementById("refreshButton");
+    const searchInput = document.getElementById("searchInput");
+
+    let allLogs = [];
+
+    function escapeText(value) {
+        return String(value ?? "");
+    }
+
+    function formatAction(action) {
+        const names = {
+            CREATE: "Document Created",
+            SHARE: "Document Shared",
+            OPEN: "Document Opened",
+            REVOKE: "Access Revoked"
+        };
+
+        return names[action] || String(action || "Unknown Activity");
+    }
+
+    function actionClass(action) {
+        const classes = {
+            CREATE: "create",
+            SHARE: "share",
+            OPEN: "open",
+            REVOKE: "revoke"
+        };
+
+        return classes[action] || "unknown";
+    }
+
+    function formatDate(value) {
+        if (!value) return "Unknown date";
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return escapeText(value);
+        }
+
+        return date.toLocaleString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    function updateSummary(logs) {
+        document.getElementById("totalCount").textContent = logs.length;
+        document.getElementById("createCount").textContent =
+            logs.filter(log => log.action === "CREATE").length;
+        document.getElementById("shareCount").textContent =
+            logs.filter(log => log.action === "SHARE").length;
+        document.getElementById("revokeCount").textContent =
+            logs.filter(log => log.action === "REVOKE").length;
+    }
+
+    function showMessage(message, isError = false) {
+        activityBody.replaceChildren();
+
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+
+        cell.colSpan = 4;
+        cell.className = isError ? "status error" : "status";
+        cell.textContent = message;
+
+        row.appendChild(cell);
+        activityBody.appendChild(row);
+    }
+
+    function renderLogs() {
+        const query = searchInput.value.trim().toLowerCase();
+
+        const filtered = allLogs.filter(log => {
+            const searchable = [
+                formatAction(log.action),
+                log.action,
+                log.userId,
+                log.documentId,
+                formatDate(log.timestamp)
+            ].join(" ").toLowerCase();
+
+            return searchable.includes(query);
+        });
+
+        activityBody.replaceChildren();
+
+        if (filtered.length === 0) {
+            showMessage(
+                allLogs.length === 0
+                    ? "No activity has been recorded yet."
+                    : "No activities match your search."
+            );
+            return;
+        }
+
+        filtered.forEach(log => {
+            const row = document.createElement("tr");
+
+            const actionCell = document.createElement("td");
+            const badge = document.createElement("span");
+            badge.className = "action " + actionClass(log.action);
+            badge.textContent = formatAction(log.action);
+            actionCell.appendChild(badge);
+
+            const userCell = document.createElement("td");
+            userCell.textContent = escapeText(log.userId);
+            userCell.className = "muted";
+
+            const documentCell = document.createElement("td");
+            documentCell.textContent = escapeText(log.documentId);
+            documentCell.className = "muted";
+
+            const timeCell = document.createElement("td");
+            timeCell.textContent = formatDate(log.timestamp);
+
+            row.append(actionCell, userCell, documentCell, timeCell);
+            activityBody.appendChild(row);
+        });
+    }
+
+    async function loadLogs() {
+        refreshButton.disabled = true;
+        refreshButton.textContent = "Loading...";
+        resultStatus.hidden = true;
+        showMessage("Loading activity logs...");
+
+        try {
+            const response = await fetch("/api/audit-logs", {
+                credentials: "same-origin"
+            });
+
+            if (response.status === 401) {
+                window.location.href = "/login.html";
+                return;
+            }
+
+            if (response.status === 403) {
+                showMessage(
+                    "Access denied. Only administrators can view activity logs.",
+                    true
+                );
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error("Unable to load activity logs.");
+            }
+
+            const data = await response.json();
+
+            if (!Array.isArray(data)) {
+                throw new Error("The server returned an unexpected response.");
+            }
+
+            allLogs = data.sort((a, b) => {
+                return new Date(b.timestamp).getTime()
+                    - new Date(a.timestamp).getTime();
+            });
+
+            updateSummary(allLogs);
+            renderLogs();
+
+        } catch (error) {
+            showMessage(
+                error.message || "Something went wrong while loading logs.",
+                true
+            );
+        } finally {
+            refreshButton.disabled = false;
+            refreshButton.textContent = "↻ Refresh Logs";
+        }
+    }
+
+    async function checkAdminAndLoad() {
+        try {
+            const response = await fetch("/api/auth/me", {
+                credentials: "same-origin"
+            });
+
+            if (response.status === 401) {
+                window.location.href = "/login.html";
+                return;
+            }
+
+            if (!response.ok) {
+                showMessage("Unable to verify your account.", true);
+                return;
+            }
+
+            const user = await response.json();
+
+            if (user.role !== "ADMIN") {
+                showMessage(
+                    "Access denied. This page is available to administrators only.",
+                    true
+                );
+                return;
+            }
+
+            await loadLogs();
+
+        } catch (error) {
+            showMessage("Unable to connect to the server.", true);
+        }
+    }
+
+    refreshButton.addEventListener("click", loadLogs);
+    searchInput.addEventListener("input", renderLogs);
+
+    document.getElementById("logoutLink").addEventListener("click", async event => {
+        event.preventDefault();
+
+        try {
+            await fetch("/api/logout", {
+                method: "POST",
+                credentials: "same-origin"
+            });
+        } finally {
+            window.location.href = "/login.html";
+        }
+    });
+
+    checkAdminAndLoad();
+</script>
+</body>
+</html>

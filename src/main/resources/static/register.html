@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustVault - Create Account</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0f172a;
+            color: #f8fafc;
+            font-family: Arial, sans-serif;
+        }
+        .card {
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            background: #1e293b;
+            border-radius: 14px;
+        }
+        h1 { text-align: center; }
+        p { color: #cbd5e1; text-align: center; }
+        label { display: block; margin-top: 16px; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 7px;
+            border: 1px solid #475569;
+            border-radius: 7px;
+            background: #0f172a;
+            color: white;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 22px;
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            border-radius: 7px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        a { color: #38bdf8; }
+        .links { text-align: center; margin-top: 18px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Create Account</h1>
+        <p>Create your TrustVault account</p>
+
+        <form id="registerForm">
+            <label for="name">Full Name</label>
+            <input id="name" name="fullName" type="text" required>
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required>
+
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password"
+                   minlength="8" required>
+
+            <button type="submit">Register</button>
+        </form>
+
+        <div class="links">
+            <a href="/">Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("registerForm")
+            .addEventListener("submit", async function(event) {
+                event.preventDefault();
+
+                const fullName = document.getElementById("name").value.trim();
+                const email = document.getElementById("email").value.trim();
+                const password = document.getElementById("password").value;
+
+                try {
+                    const response = await fetch("/api/register", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            fullName: fullName,
+                            email: email,
+                            password: password
+                        })
+                    });
+
+                    const result = await response.text();
+
+                    if (response.ok) {
+                        alert("Account created successfully!");
+                        document.getElementById("registerForm").reset();
+                    } else {
+                        alert("Registration failed: " + result);
+                    }
+                } catch (error) {
+                    alert("Unable to connect to the server. Please try again.");
+                    console.error(error);
+                }
+            });
+    </script>
+</body>
+</html>
