@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustVault — Audit Trail & Ledger Verification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/80 sticky top-0 z-40 backdrop-blur">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <a href="/" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 transition">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-lg font-bold text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-scale-balanced text-indigo-400"></i>
+                        <span>Administrative Audit Ledger</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Tamper-Evident SHA-256 Cryptographic Chain of Custody</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button onclick="verifyChain()" id="verifyBtn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold shadow-lg shadow-emerald-500/20 flex items-center space-x-2 transition">
+                    <i class="fa-solid fa-link"></i>
+                    <span>Verify Audit Chain</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+        <!-- Hash Chain Verification Status Box -->
+        <div id="chainStatusBox" class="p-4 rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div id="chainStatusIcon" class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400">
+                    <i class="fa-solid fa-shield text-lg"></i>
+                </div>
+                <div>
+                    <div id="chainStatusTitle" class="text-sm font-semibold text-white">Cryptographic Chain Verification Ready</div>
+                    <div id="chainStatusMsg" class="text-xs text-slate-400">Click 'Verify Audit Chain' to mathematically recalculate SHA-256 block hashes from Genesis.</div>
+                </div>
+            </div>
+            <div id="chainBadge" class="text-xs px-3 py-1 rounded-full font-mono bg-slate-800 text-slate-400 border border-slate-700">
+                UNCHECKED
+            </div>
+        </div>
+
+        <!-- Filters Toolbar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+            <div class="flex flex-wrap items-center gap-2">
+                <select id="actionFilter" onchange="loadAuditLogs()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+                    <option value="">All Actions</option>
+                    <option value="UPLOAD">UPLOAD</option>
+                    <option value="DOWNLOAD">DOWNLOAD</option>
+                    <option value="VIEW">VIEW</option>
+                    <option value="GRANT">GRANT</option>
+                    <option value="REVOKE">REVOKE</option>
+                    <option value="DENIED_ACCESS">DENIED_ACCESS</option>
+                    <option value="LOGIN">LOGIN</option>
+                </select>
+                <select id="statusFilter" onchange="loadAuditLogs()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+                    <option value="">All Statuses</option>
+                    <option value="ALLOWED">ALLOWED (Success)</option>
+                    <option value="DENIED">DENIED (Blocked/Refused)</option>
+                </select>
+                <input type="text" id="userEmailFilter" placeholder="Filter by email..." oninput="debounceLoadLogs()"
+                    class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-500">
+            </div>
+            <button onclick="loadAuditLogs()" class="px-3 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                <span>Refresh Log</span>
+            </button>
+        </div>
+
+        <!-- Audit Table -->
+        <div class="border border-slate-800 rounded-2xl overflow-hidden bg-slate-900/40">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-800 bg-slate-900/80 text-slate-400 uppercase tracking-wider font-semibold">
+                            <th class="py-3 px-4">#</th>
+                            <th class="py-3 px-4">Timestamp (UTC)</th>
+                            <th class="py-3 px-4">Action</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4">Actor</th>
+                            <th class="py-3 px-4">Target Document</th>
+                            <th class="py-3 px-4">IP Address</th>
+                            <th class="py-3 px-4">Details</th>
+                            <th class="py-3 px-4">SHA-256 Hash</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditTableBody" class="divide-y divide-slate-800/60 font-mono">
+                        <tr><td colspan="9" class="text-center py-8 text-slate-500">Loading audit records...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const API_URL = "/api";
+        let token = localStorage.getItem("tv_token");
+
+        function getAuthHeaders() {
+            return {
+                "Content-Type": "application/json",
+                ...(token ? { "Authorization": `Bearer ${token}` } : {})
+            };
+        }
+
+        async function loadAuditLogs() {
+            if (!token) {
+                window.location.href = "/";
+                return;
+            }
+            const action = document.getElementById("actionFilter").value;
+            const status = document.getElementById("statusFilter").value;
+            const email = document.getElementById("userEmailFilter").value;
+
+            let url = `${API_URL}/audit?limit=200`;
+            if (action) url += `&action=${action}`;
+            if (status) url += `&status=${status}`;
+            if (email) url += `&user_email=${encodeURIComponent(email)}`;
+
+            try {
+                const res = await fetch(url, { headers: getAuthHeaders() });
+                if (res.status === 401 || res.status === 403) {
+                    alert("Admin access required. Please log in as Admin on the main page.");
+                    window.location.href = "/";
+                    return;
+                }
+                const logs = await res.json();
+                renderLogs(logs);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderLogs(logs) {
+            const tbody = document.getElementById("auditTableBody");
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-500">No matching audit events found</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = logs.map(l => {
+                const isDenied = l.status === "DENIED";
+                const statusBadge = isDenied 
+                    ? `<span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">DENIED</span>`
+                    : `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">ALLOWED</span>`;
+
+                let actionBadgeColor = "bg-slate-800 text-slate-300";
+                if (l.action === "UPLOAD") actionBadgeColor = "bg-blue-500/20 text-blue-300";
+                if (l.action === "DOWNLOAD") actionBadgeColor = "bg-cyan-500/20 text-cyan-300";
+                if (l.action === "GRANT") actionBadgeColor = "bg-emerald-500/20 text-emerald-300";
+                if (l.action === "REVOKE") actionBadgeColor = "bg-amber-500/20 text-amber-300";
+                if (l.action === "DENIED_ACCESS") actionBadgeColor = "bg-rose-500/20 text-rose-300 font-bold";
+
+                const dateStr = new Date(l.created_at).toLocaleString();
+
+                return `
+                    <tr class="hover:bg-slate-900/60 transition ${isDenied ? 'bg-rose-950/10' : ''}">
+                        <td class="py-2.5 px-4 text-slate-400 font-bold">${l.sequence_id}</td>
+                        <td class="py-2.5 px-4 text-slate-300 whitespace-nowrap">${dateStr}</td>
+                        <td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded text-[11px] font-semibold ${actionBadgeColor}">${l.action}</span></td>
+                        <td class="py-2.5 px-4">${statusBadge}</td>
+                        <td class="py-2.5 px-4 text-slate-200">${l.user_email || 'ANONYMOUS'}</td>
+                        <td class="py-2.5 px-4 text-slate-300 max-w-xs truncate" title="${l.document_title || ''}">${l.document_title || '-'}</td>
+                        <td class="py-2.5 px-4 text-slate-400 text-[11px]">${l.ip_address || '-'}</td>
+                        <td class="py-2.5 px-4 text-slate-300 text-[11px] max-w-sm truncate" title="${l.details || ''}">${l.details || '-'}</td>
+                        <td class="py-2.5 px-4 text-slate-500 text-[10px]" title="Current: ${l.current_hash}\nPrevious: ${l.previous_hash}">${l.current_hash.substring(0, 10)}...</td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        async function verifyChain() {
+            const btn = document.getElementById("verifyBtn");
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Verifying...</span>`;
+
+            try {
+                const res = await fetch(`${API_URL}/audit/verify`, { headers: getAuthHeaders() });
+                const data = await res.json();
+
+                const box = document.getElementById("chainStatusBox");
+                const icon = document.getElementById("chainStatusIcon");
+                const title = document.getElementById("chainStatusTitle");
+                const msg = document.getElementById("chainStatusMsg");
+                const badge = document.getElementById("chainBadge");
+
+                if (data.is_valid) {
+                    box.className = "p-4 rounded-2xl border border-emerald-500/40 bg-emerald-950/20 backdrop-blur flex items-center justify-between";
+                    icon.className = "w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center";
+                    icon.innerHTML = `<i class="fa-solid fa-check-double text-lg"></i>`;
+                    title.textContent = "Cryptographic Chain 100% Intact & Untampered";
+                    msg.textContent = `${data.message} (${data.verified_records} blocks mathematically verified from Genesis).`;
+                    badge.className = "text-xs px-3 py-1 rounded-full font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold";
+                    badge.textContent = "VERIFIED";
+                } else {
+                    box.className = "p-4 rounded-2xl border border-rose-500/40 bg-rose-950/30 backdrop-blur flex items-center justify-between";
+                    icon.className = "w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center";
+                    icon.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-lg"></i>`;
+                    title.textContent = "CRITICAL: Audit Chain Tampering Detected!";
+                    msg.textContent = data.message;
+                    badge.className = "text-xs px-3 py-1 rounded-full font-mono bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold";
+                    badge.textContent = "TAMPERED";
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error running chain verification");
+            } finally {
+                btn.innerHTML = `<i class="fa-solid fa-link"></i> <span>Verify Audit Chain</span>`;
+            }
+        }
+
+        let debounceTimer;
+        function debounceLoadLogs() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(loadAuditLogs, 300);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadAuditLogs();
+        });
+    </script>
+</body>
+</html>
+
